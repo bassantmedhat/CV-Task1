@@ -107,4 +107,5 @@ def display_bar_graph( x ,height, width, color):
             hist, bins = histogram(source=source[:, :, i], bins_num=256)
             pdf = (250*hist) / sum( hist)
             cdf = np.cumsum(pdf)
+            cdf = np.floor(255 *cdf ).astype('uint8')
             plt.plot(bins, cdf, label="CDF", color=colors[i])
