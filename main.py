@@ -119,13 +119,14 @@ elif chosen_id == "tab2":
         image = Image.open(my_upload)
         i_image, f_image = st.columns([1, 1])
         chart1, chart2 = st.columns([1, 1])
+        converted_img = np.array(image)
+        gray_scale = Histogram.rgb_to_gray(converted_img)
         with i_image:
             st.markdown(
                 '<p style= "text-align: center;">Input Image</p>', unsafe_allow_html=True)
             st.image(image, width=300)
 
         if histogram == 'normalized image':
-            converted_img = np.array(image)
             normalized_image, norm_hist, bins = Histogram.normalize_histogram(
                 source=converted_img, bins_num=256)
 
@@ -145,7 +146,6 @@ elif chosen_id == "tab2":
                 Histogram.draw_rgb_histogram(source=normalized_image)
 
         elif histogram == 'equalized image':
-            converted_img = np.array(image)
             equlized_img, bins = Histogram.equalize_histogram(
                 source=converted_img, bins_num=256)
 
@@ -164,7 +164,6 @@ elif chosen_id == "tab2":
                     '<p style="text-align: center;">Equalize Histogram</p>', unsafe_allow_html=True)
                 Histogram.draw_rgb_histogram(source=equlized_img)
         elif histogram == 'gray image':
-            converted_img = np.array(image)
             gray_scale = Histogram.rgb_to_gray(converted_img)
 
             with f_image:
@@ -183,8 +182,6 @@ elif chosen_id == "tab2":
                 Histogram.draw_gray_histogram(source=gray_scale, bins_num=255)
 
         elif histogram == 'global thresholding':
-            converted_img = np.array(image)
-            gray_scale = Histogram.rgb_to_gray(converted_img)
             slider = st.sidebar.slider(
                 'Adjust the intensity', 0, 255, 128, step=1)
             global_threshold = Histogram.global_threshold(
@@ -209,8 +206,6 @@ elif chosen_id == "tab2":
                     x=bins, height=[hist_glob[0], hist_glob[-1]], width=0.2)
 
         elif histogram == 'local thresholding':
-            converted_img = np.array(image)
-            gray_scale = Histogram.rgb_to_gray(converted_img)
             local_threshold = Histogram.local_threshold1(
                 source=gray_scale, divs=250)
 
@@ -229,7 +224,6 @@ elif chosen_id == "tab2":
                     '<p style="text-align: center;">Global Histogram</p>', unsafe_allow_html=True)
                 hist, bins =Histogram.histogram(source=local_threshold, bins_num=2)
                 Histogram.display_bar_graph(x=bins,height =[hist[0], hist[-1]], width=0.2)
-
 
 #############################################################################################################
 elif chosen_id == 'tab3':
