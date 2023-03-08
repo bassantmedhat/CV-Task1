@@ -114,20 +114,6 @@ if chosen_id == "tab1":
         
 
 
-    #     if selected_filter == "Gaussian Filter":
-            
-    #         g_filter = fs.gaussian_filter(img)
-    #         g_filter_norm = g_filter / 255.0  # Normalize to [0.0, 1.0]
-    #         st.image(g_filter_norm, caption='Gaussian Filter', use_column_width=True)
-    #    elif selected_filter == "Average Filter":
-    #         avg_filter = fs.average_filter(img)
-    #         # avg_filter_norm = avg_filter / 255.0  # Normalize to [0.0, 1.0]
-    #         st.image(avg_filter, caption='Average Filter', use_column_width=True)
-    #    else:
-    #         removed_noise = fs.median_filter(img, 3)
-    #         # removed_noise_norm = removed_noise / 255.0  # Normalize to [0.0, 1.0]
-    #         st.image(removed_noise, caption='Median Filter', use_column_width=True)
-    
 
 elif chosen_id == "tab2":
     histogram= sidebar.selectbox('Histogram',('normalized image','equalized image'))
