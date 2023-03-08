@@ -2,26 +2,46 @@ from turtle import color
 import pandas as pd 
 import streamlit as st 
 from  PIL import Image, ImageEnhance
-import threshold as threshold
+import functions as fn
 import numpy as np
 import cv2
 import extra_streamlit_components as stx
-
+from io import StringIO
+import os
+# files = st.sidebar.file_uploader("Choose files", accept_multiple_files=True)
 st.set_page_config(
     page_title="Filtering and Edge detection",
     page_icon="✅",
     layout="wide",
 )
 st.title("Filtering and Ege detection")
+css = """
+.uploadedFiles {
+    display: none;
+}
+"""
+# or `visibility: hidden;`
+
+
 with open(r"style.css") as design:
     st.markdown(f"<style>{design.read()}</style>", unsafe_allow_html=True)
+    st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
+
 my_upload = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
 chosen_id = stx.tab_bar(data=[
 stx.TabBarItemData(id="tab1", title="Filters",description=''),
-stx.TabBarItemData(id="tab2", title="Histograms",description=''),stx.TabBarItemData(id='tab3',title='Hybrid',description='')])
+stx.TabBarItemData(id="tab2", title="Histograms",description=''),
+stx.TabBarItemData(id='tab3',title='Hybrid',description='')])
 sidebar = st.sidebar.container()
 
-#images 
+
+
+
+def file_selector(folder_path='.'):
+    filenames = os.listdir(folder_path)
+    selected_filename = st.selectbox('Select a file', filenames)
+    return os.path.join(folder_path, selected_filename)
+
 
 if chosen_id == "tab1":
 
@@ -72,19 +92,44 @@ elif chosen_id == "tab2":
             st.bar_chart()
 elif chosen_id=='tab3': 
        #images
+  
+            col1, col2 = st.columns(2)
+            second = st.file_uploader("Upload second image", type=["png", "jpg", "jpeg"])
+            High_pass_first = st.checkbox('high pass for the first image')
 
-    sidebar.button('Make Hybrid')
-    if my_upload is not None:
-      image = Image.open(my_upload)
-      i_image, f_image = st.columns( [1, 1])
-      with i_image:
-          st.markdown('<p style="text-align: center;">Input1 Image</p>',unsafe_allow_html=True)
-          st.image(image,width=350)  
-      with f_image:
-          st.markdown('<p style="text-align: center;">Input2 Image</p>',unsafe_allow_html=True)
-      n_image, e_image = st.columns( [1, 1])
-      with n_image:
-          st.markdown('<p style="text-align: center;">Hybrid Image</p>',unsafe_allow_html=True)
+            if my_upload is not None:
+                if second is not None:
+                    path_1='img/'+ my_upload.name
+                    path_2='img/'+second.name
+                    sidebar.button('Make Hybrid')
+                    flag_1 = 0
+                    flag_2=1
+                    if High_pass_first:
+                        flag_1 = 1
+                        flag_2=0
 
+
+                
+                    i_image, i_image_2, f_image,f_image_2 = st.columns([1,1,1,1])
+                    with i_image_2:
+                        st.image(fn.prepare(path_1)) 
+                    with i_image:
+                        st.markdown('<p style="text-align: center;">Input1 Image</p>',unsafe_allow_html=True)
+                        updated_path_1 = fn.getfilter(path_1,flag_1)
+                        st.image(updated_path_1 ) 
+                    with f_image_2:
+                        st.image(fn.prepare(path_2))         
+                    with f_image:
+                        st.markdown('<p style="text-align: center;">Input2 Image</p>',unsafe_allow_html=True)
+                        updated_path_2 = fn.getfilter(path_2,flag_2)
+
+                        st.image(updated_path_2)
+                
+                    n_image, e_image = st.columns( [1, 1])
+                    with n_image:
+                        st.markdown('<p style="text-align: center;">Hybrid Image</p>',unsafe_allow_html=True)
+                        st.image(fn.hybrid_images(updated_path_1,updated_path_2))
+
+          
 else:
     sidebar.empty()
