@@ -101,7 +101,7 @@ def display_bar_graph( x ,height, width, color):
     plt.bar(x=x, height=height, width=width, color=color)
 
 #################################################################################################################
- def rgb_distribution_curve(source: np.ndarray):
+def rgb_distribution_curve(source: np.ndarray):
         colors = ["red" , "green","blue"]
         for i in range(source.shape[2]):
             hist, bins = histogram(source=source[:, :, i], bins_num=256)

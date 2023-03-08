@@ -1,7 +1,138 @@
-import numpy as np
 import cv2
+import numpy as np
+from scipy.stats.kde import gaussian_kde
+import matplotlib.pyplot as plt
+from skimage import img_as_ubyte
+from PIL import Image
 from scipy.signal import convolve2d
-from skimage.feature import peak_local_max
+
+# original image
+# pic = cv2.imread('tiger.jpg', 0) #to convert the image to gray scale
+# pic = pic/255  #normalization
+# x, y = pic.shape #take x,y which is the total no of coloums & rows from the image
+
+# # create gaussian noise(random number) 
+# image = pic
+def add_gaussian_noise(image, mean =0 , var = 0.01):
+    sigma = np.sqrt(var)
+    noise = np.random.normal(mean, sigma, size=image.shape)
+    noisy_image = image + noise
+    noisy_image = np.clip(noisy_image, 0, 1)
+    return noisy_image
+
+# blank image
+def add_salt_pepper_noise(image, pepper_amount = 0):
+    salt_amount = 1 - pepper_amount
+    noisy_image = np.copy(image)
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            rdn = np.random.random()
+            if rdn < pepper_amount:
+                noisy_image[i][j] = 0
+            elif rdn > salt_amount:
+                noisy_image[i][j] = 1
+    noisy_image = np.clip(noisy_image, 0, 1)
+    return noisy_image
+
+# uniform noise
+def add_uniform_noise(image, a = 0 , b = 0.2):
+    noise = np.random.uniform(a, b, size=image.shape)
+    noisy_image = image + noise
+    noisy_image = np.clip(noisy_image, 0, 1)
+    return noisy_image
+
+# display all
+# cv2.imshow('original image', pic)
+# cv2.imshow('image with gaussian noise', add_gaussian_noise(pic))
+# cv2.imshow('image with salt & pepper noise',  add_salt_pepper_noise(pic))
+# cv2.imshow('image with uniform noise', add_uniform_noise(pic))
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+
+
+
+
+
+
+
+
+
+def gaussian_filter(img, D0=20):
+    F = np.fft.fft2(img)
+    Fshift = np.fft.fftshift(F)
+    x, y = img.shape
+    H = np.zeros((x, y), dtype=np.float32)
+    for i in range(x):
+        for j in range(y):
+            D = np.sqrt((i-x/2)**2 + (j-y/2)**2)
+            H[i,j] = np.exp(-D**2/(2*D0*D0)) 
+    Gshift = Fshift * H
+    G = np.fft.ifftshift(Gshift)
+    g_filter = np.abs(np.fft.ifft2(G))
+    return g_filter
+
+
+def average_filter(img):
+    mask = np.ones([3, 3], dtype=int)
+    mask = mask / 9
+    x, y = img.shape
+    img_new = np.zeros([x, y])
+    for i in range(1, x-1):
+        for j in range(1, y-1):
+            temp = img[i-1, j-1]*mask[0, 0] + img[i-1, j]*mask[0, 1] + img[i-1, j + 1]*mask[0, 2] + img[i, j-1]*mask[1, 0] + img[i, j]*mask[1, 1] + img[i, j + 1]*mask[1, 2] + img[i + 1, j-1]*mask[2, 0] + img[i + 1, j]*mask[2, 1] + img[i + 1, j + 1]*mask[2, 2]
+            img_new[i, j] = temp
+    img_new = img_new.astype(np.uint8)
+    return img_new
+
+
+def median_filter(data, filter_size):
+    temp = []
+    indexer = filter_size // 2
+    data_final = []
+    data_final = np.zeros((len(data),len(data[0])))
+    for i in range(len(data)):
+        for j in range(len(data[0])):
+            for z in range(filter_size):
+                if i + z - indexer < 0 or i + z - indexer > len(data) - 1:
+                    for c in range(filter_size):
+                        temp.append(0)
+                else:
+                    if j + z - indexer < 0 or j + indexer > len(data[0]) - 1:
+                        temp.append(0)
+                    else:
+                        for k in range(filter_size):
+                            temp.append(data[i + z - indexer][j + k - indexer])
+            temp.sort()
+            data_final[i][j] = temp[len(temp) // 2]
+            temp = []
+    return data_final
+
+
+# img = cv2.imread('noisy_image.png', 0)
+
+# g_filter = gaussian_filter(img)
+# plt.figure(figsize=(5,5))
+# plt.imshow(g_filter, cmap='gray')
+# plt.axis('off')
+# plt.show()
+
+# avg_filter = average_filter(img)
+# cv2.imshow('Average filter', avg_filter)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+
+# pic = Image.open("noisy_image.png").convert("L")
+# arr = np.array(pic)
+# removed_noise = median_filter(arr, 3)
+# plt.figure(figsize=(5,5))
+# plt.imshow(removed_noise, cmap='gray')
+# plt.axis('off')
+# plt.show()
+
+
+
+
+
 
 
 def convolution(image,kernel):
@@ -112,7 +243,7 @@ def hysteresis(img, weak, strong):
 
 
 
-def edge_detection(image_path, detector='canny'):
+def edge_detection(image, detector='canny'):
     """
     Apply edge detection on the image located at `image_path` using the specified detector.
 
@@ -125,16 +256,15 @@ def edge_detection(image_path, detector='canny'):
 
     Returns:
     --------
-    None
-
-    Saves the resulting edge detection image to a file with a name that reflects the detector used.
+    Image
     """
-    image = cv2.imread(image_path, 0)
+    # image = cv2.imread(image_path, 0)
     padded_image = zero_padding(image)
     mean_kernel = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]]) / 9
     x_kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
     y_kernel = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
     smoothed_image = convolution(padded_image, mean_kernel)
+    returned_image = 0
     
     if detector == 'canny':
         x_edges = convolution(smoothed_image, x_kernel)
@@ -146,6 +276,7 @@ def edge_detection(image_path, detector='canny'):
         thresholded, weak, strong = double_threshold(edges_image)
         final_image = hysteresis(thresholded, weak, strong)
         cv2.imwrite("Canny.jpg", final_image)
+        returned_image = final_image
 
     elif detector == 'sobel':
         x_edges = convolution(smoothed_image, x_kernel)
@@ -153,7 +284,7 @@ def edge_detection(image_path, detector='canny'):
         edges_image_sobel = np.hypot(x_edges, y_edges)
         edges_image_sobel = edges_image_sobel.astype(np.uint8)
         # cv2.imwrite("Sobel.jpg", edges_image_sobel)
-        return edges_image_sobel
+        returned_image = edges_image_sobel
 
     elif detector == 'roberts':
         kernel_x = np.array([[1, 0], [0, -1]])
@@ -163,6 +294,7 @@ def edge_detection(image_path, detector='canny'):
         edges_image_roberts = np.hypot(horizontal_detection, vertical_detection)
         edges_image_roberts = edges_image_roberts.astype(np.uint8)
         cv2.imwrite("Roberts.jpg", edges_image_roberts)
+        returned_image = edges_image_roberts
     
     elif detector == 'prewitt':
         kernel_x = np.array([[1, 0, -1], [1, 0, -1], [1, 0, -1]])
@@ -171,10 +303,14 @@ def edge_detection(image_path, detector='canny'):
         vertical_detection = convolution(smoothed_image, kernel_y)
         edges_image_prewitt = np.hypot(horizontal_detection, vertical_detection)
         edges_image_prewitt = edges_image_prewitt.astype(np.uint8)
-        # cv2.imwrite("Prewitt.jpg", edges_image_prewitt)
+        cv2.imwrite("Prewitt.jpg", edges_image_prewitt)
+        returned_image = edges_image_prewitt
     
     else:
         raise ValueError("Invalid detector specified")
+    
+    return returned_image
 
 
-edge_detection("image.jpg" , "roberts")
+# edge_detection("image.jpg" , "roberts")
+
