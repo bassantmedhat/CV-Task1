@@ -76,7 +76,7 @@ if chosen_id == "tab1":
                 noisy_image = fs.add_uniform_noise(img, a=0, b=sigma_noise)
 
                 st.image(noisy_image, caption='Uniform Noise', width=350)
-            elif selected_filter == "Gaussian Noise":
+            elif selected_noise == "Gaussian Noise":
                     # SNR to variance conversion
                     var = np.var(image) / (10**(snr_value / 10))
                     noisy_image = fs.add_gaussian_noise(img, mean=0, var=var)
