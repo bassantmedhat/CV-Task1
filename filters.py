@@ -14,6 +14,7 @@ from scipy.signal import convolve2d
 # # create gaussian noise(random number) 
 # image = pic
 def add_gaussian_noise(image, mean =0 , var = 0.01):
+    image = image/255
     sigma = np.sqrt(var)
     noise = np.random.normal(mean, sigma, size=image.shape)
     noisy_image = image + noise
@@ -22,6 +23,8 @@ def add_gaussian_noise(image, mean =0 , var = 0.01):
 
 # blank image
 def add_salt_pepper_noise(image, pepper_amount = 0):
+    image = image/255
+
     salt_amount = 1 - pepper_amount
     noisy_image = np.copy(image)
     for i in range(image.shape[0]):
@@ -36,12 +39,14 @@ def add_salt_pepper_noise(image, pepper_amount = 0):
 
 # uniform noise
 def add_uniform_noise(image, a = 0 , b = 0.2):
+    image = image/255
+
     noise = np.random.uniform(a, b, size=image.shape)
     noisy_image = image + noise
     noisy_image = np.clip(noisy_image, 0, 1)
     return noisy_image
 
-# display all
+# # display all
 # cv2.imshow('original image', pic)
 # cv2.imshow('image with gaussian noise', add_gaussian_noise(pic))
 # cv2.imshow('image with salt & pepper noise',  add_salt_pepper_noise(pic))
