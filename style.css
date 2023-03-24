@@ -1,4 +1,7 @@
-
+.uploadedFiles {
+    display: none;
+    visibility: hidden;
+}
 .css-hxt7ib {
     padding-top: 10px;
     padding-left: 1rem;
@@ -6,6 +9,12 @@
     /* padding: 3px; */
    
 
+}
+.css-6qob1r {
+    position: relative;
+    height: 100%;
+    width: 50%;
+    overflow: overlay;
 }
 .qq-upload-button.form-submit-button-simple_grey {
 

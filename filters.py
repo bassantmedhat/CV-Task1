@@ -280,7 +280,6 @@ def edge_detection(image, detector='canny'):
         edges_image = non_maximum_suppression(gradient_direction, gradient_magnitude, image, 0.2)
         thresholded, weak, strong = double_threshold(edges_image)
         final_image = hysteresis(thresholded, weak, strong)
-        cv2.imwrite("Canny.jpg", final_image)
         returned_image = final_image
 
     elif detector == 'sobel':
@@ -288,7 +287,6 @@ def edge_detection(image, detector='canny'):
         y_edges = convolution(smoothed_image, y_kernel)
         edges_image_sobel = np.hypot(x_edges, y_edges)
         edges_image_sobel = edges_image_sobel.astype(np.uint8)
-        # cv2.imwrite("Sobel.jpg", edges_image_sobel)
         returned_image = edges_image_sobel
 
     elif detector == 'roberts':
@@ -298,7 +296,6 @@ def edge_detection(image, detector='canny'):
         vertical_detection = convolution(smoothed_image, kernel_y)
         edges_image_roberts = np.hypot(horizontal_detection, vertical_detection)
         edges_image_roberts = edges_image_roberts.astype(np.uint8)
-        cv2.imwrite("Roberts.jpg", edges_image_roberts)
         returned_image = edges_image_roberts
     
     elif detector == 'prewitt':
@@ -308,7 +305,6 @@ def edge_detection(image, detector='canny'):
         vertical_detection = convolution(smoothed_image, kernel_y)
         edges_image_prewitt = np.hypot(horizontal_detection, vertical_detection)
         edges_image_prewitt = edges_image_prewitt.astype(np.uint8)
-        cv2.imwrite("Prewitt.jpg", edges_image_prewitt)
         returned_image = edges_image_prewitt
     
     else:
